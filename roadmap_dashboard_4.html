@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ロードマップ ダッシュボード ｜ BitStar</title>
+<style>
+:root{
+  --bg:#eef3fa; --bg2:#ffffff; --panel:#ffffff; --panel2:#f3f7fd;
+  --line:#dde6f2; --line2:#c6d5e8;
+  --ink:#13243d; --ink2:#52617c; --ink3:#92a0b8;
+  --amber:#2563eb; --amber-d:#1b4fc4;        /* accent (blue) */
+  --teal:#0ea5e9; --teal-d:#0284c7;          /* data / 実績 (sky blue) */
+  --slate:#9aa9c2;
+  --red:#e23744; --red-bg:rgba(226,55,68,.10);
+  --green:#15a05a;
+  --mono:'SFMono-Regular',ui-monospace,'Roboto Mono','DejaVu Sans Mono',monospace;
+  --sans:'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic UI','Noto Sans JP','Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(14,165,233,.07), transparent 60%),
+    var(--bg);
+  color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;
+  background-image:repeating-linear-gradient(0deg,#1b3a6b 0,#1b3a6b 1px,transparent 1px,transparent 3px);}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 22px 80px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding:26px 0 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand h1{font-size:20px;margin:0;letter-spacing:.02em;font-weight:800}
+.brand .sub{color:var(--ink2);font-size:12px;margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+.brand .accent{color:var(--amber)}
+.legend{display:flex;gap:16px;align-items:center;font-size:11.5px;color:var(--ink2);flex-wrap:wrap}
+.legend i{display:inline-block;width:22px;height:0;border-top:2px solid;vertical-align:middle;margin-right:6px}
+.legend .a{border-color:var(--teal)} .legend .t{border-color:var(--slate);border-top-style:dashed}
+.legend .b{width:10px;height:10px;border:0;background:var(--red);border-radius:2px;display:inline-block;vertical-align:middle;margin-right:6px}
+
+nav.tabs{display:flex;gap:6px;margin:18px 0 22px;flex-wrap:wrap}
+nav.tabs button{background:var(--panel);color:var(--ink2);border:1px solid var(--line);
+  padding:9px 16px;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:13.5px;font-weight:600;
+  transition:.15s}
+nav.tabs button:hover{border-color:var(--line2);color:var(--ink)}
+nav.tabs button.on{background:linear-gradient(180deg,#eaf1ff,#dfe9ff);color:var(--amber);
+  border-color:var(--amber-d);box-shadow:0 0 0 1px rgba(37,99,235,.18) inset}
+
+.panel{background:#ffffff;border:1px solid var(--line);
+  border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(20,40,80,.04)}
+.panel h2{margin:0 0 4px;font-size:15px;letter-spacing:.02em}
+.panel .desc{color:var(--ink2);font-size:12.5px;margin-bottom:16px}
+
+.ctrls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.ctrls label{font-size:12px;color:var(--ink2)}
+select,input[type=text]{background:var(--panel2);color:var(--ink);border:1px solid var(--line2);
+  border-radius:8px;padding:7px 10px;font-family:var(--sans);font-size:13px}
+select:focus,input:focus{outline:none;border-color:var(--amber-d)}
+
+/* KPI cards */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:13px 14px}
+.kpi .k{font-size:11px;color:var(--ink2);letter-spacing:.04em}
+.kpi .v{font-family:var(--mono);font-size:21px;font-weight:600;margin-top:6px;letter-spacing:-.01em}
+.kpi .d{font-size:11px;margin-top:3px;font-family:var(--mono)}
+.up{color:var(--green)} .down{color:var(--red)} .muted{color:var(--ink3)}
+
+/* Funnel */
+.funnel{display:flex;flex-direction:column;gap:0}
+.fstage{position:relative;padding:0 4px}
+.frow{display:grid;grid-template-columns:150px 1fr 150px;gap:14px;align-items:center;padding:7px 0}
+.fname{font-size:13px;font-weight:600}
+.fbar{position:relative;height:34px;background:var(--panel2);border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+.fbar .tfill{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(154,169,194,.35),rgba(154,169,194,.35) 6px,rgba(154,169,194,.18) 6px,rgba(154,169,194,.18) 12px);border-right:2px dashed var(--slate)}
+.fbar .afill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--teal-d),var(--teal));border-radius:0 6px 6px 0}
+.fbar .lbl{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--ink);background:rgba(255,255,255,.78);padding:1px 6px;border-radius:5px;z-index:2}
+.fmeta{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right}
+.conv{display:grid;grid-template-columns:150px 1fr 150px;gap:14px;align-items:center;margin:-2px 0}
+.conv .arrow{grid-column:2;display:flex;align-items:center;gap:10px;padding-left:4px;font-size:11.5px;color:var(--ink2)}
+.conv .pill{font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:20px;border:1px solid var(--line2);background:var(--panel2)}
+.conv.bottleneck .arrow{color:var(--red)}
+.conv.bottleneck .pill{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.btag{display:inline-block;background:var(--red);color:#1a0307;font-weight:800;font-size:10px;padding:2px 7px;border-radius:5px;letter-spacing:.06em}
+
+.diag{background:var(--red-bg);border:1px solid rgba(255,93,108,.35);border-radius:11px;padding:14px 16px;margin-top:4px}
+.diag h3{margin:0 0 8px;font-size:13px;color:var(--red);letter-spacing:.03em}
+.diag ul{margin:0;padding-left:18px} .diag li{margin:4px 0;font-size:12.5px;color:var(--ink)}
+.diag .mono{font-family:var(--mono)}
+
+/* Trends grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 12px 6px;cursor:pointer;transition:.15s}
+.card:hover{border-color:var(--amber-d);transform:translateY(-1px)}
+.card .ct{font-size:12.5px;font-weight:600;margin-bottom:2px;display:flex;justify-content:space-between;gap:8px}
+.card .ctag{font-size:10px;color:var(--ink3);font-family:var(--mono);white-space:nowrap}
+.card .cv{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-bottom:4px}
+svg.chart{display:block;width:100%;height:auto}
+.dot{fill:var(--teal)}
+.subhead{grid-column:1/-1;margin:14px 0 2px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:700;border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(15,42,82,.40);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line2);border-radius:16px;max-width:900px;width:100%;padding:22px}
+.modal .box h3{margin:0 0 2px;font-size:16px}
+.modal .box .x{float:right;cursor:pointer;color:var(--ink2);font-size:22px;line-height:1;border:0;background:none}
+
+/* edit table */
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;max-height:70vh}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:6px 8px;text-align:right;white-space:nowrap}
+th{background:var(--panel2);position:sticky;top:0;z-index:3;font-weight:600;color:var(--ink2)}
+th.mh{color:var(--amber)}
+td.name,th.name{text-align:left;position:sticky;left:0;background:var(--panel2);z-index:2;min-width:200px;font-weight:600}
+th.name{z-index:4}
+td.ro{color:var(--ink3);font-family:var(--mono);background:#f6f9fd}
+td.ed{background:rgba(14,165,233,.06)}
+td input{width:84px;background:#ffffff;border:1px solid var(--line2);border-radius:6px;color:var(--ink);
+  font-family:var(--mono);font-size:12px;padding:4px 6px;text-align:right}
+td input.tgt{border-color:var(--line2)}
+td input:focus{outline:none;border-color:var(--amber);background:#eef4ff}
+td .pair{display:flex;flex-direction:column;gap:3px}
+td .tag{font-size:9px;color:var(--ink3);text-align:left}
+.btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);padding:8px 16px;border-radius:9px;
+  cursor:pointer;font-family:var(--sans);font-weight:600;font-size:13px}
+.btn:hover{border-color:var(--amber-d)}
+.btn.primary{background:linear-gradient(180deg,var(--amber),var(--amber-d));color:#ffffff;border:0}
+.btn.danger{color:var(--red);border-color:rgba(255,93,108,.4)}
+.note{font-size:11.5px;color:var(--ink3);margin-top:8px}
+.savestat{font-size:11.5px;color:var(--teal);margin-left:6px}
+.hint{display:inline-block;font-size:11px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);
+  padding:3px 9px;border-radius:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>ロードマップ <span class="accent">ダッシュボード</span></h1>
+      <div class="sub">BitStar Next / Boost / Live ・ 2025–2026</div>
+    </div>
+    <div class="legend">
+      <span><i class="a"></i>実績</span>
+      <span><i class="t"></i>目標</span>
+      <span><span class="b"></span>ボトルネック</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-v="funnel" class="on">採用ファネル分析</button>
+    <button data-v="trends">数値の推移</button>
+    <button data-v="edit">データ編集（2026年6月〜）</button>
+  </nav>
+
+  <main id="main"></main>
+</div>
+
+<div class="modal" id="modal"><div class="box">
+  <button class="x" onclick="closeModal()">&times;</button>
+  <h3 id="mtitle"></h3>
+  <div class="cv" id="msub" style="color:var(--ink2);font-size:12px;margin-bottom:10px"></div>
+  <div id="mchart"></div>
+</div></div>
+
+<script id="seed" type="application/json">{"months": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"], "metrics": [{"row": 5, "label": "採用", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [1155.555556, 1040.0], [0.6770833333, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 8, "label": "広告費", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "yen", "values": [[null, 1804958.0], [null, 3141888.0], [null, 5501675.0], [null, 4535417.0], [null, 3886920.0], [null, 4383722.0], [null, 4740701.0], [5500000.0, 5691136.0], [6000000.0, 6559867.0], [6000000.0, 5896294.0], [5700000.0, 5579597.0], [5700000.0, 4954226.0], [6000000.0, 6349166.0], [6000000.0, 5366419.0], [6000000.0, 6732647.0], [6500000.0, 6170757.0], [6500000.0, 6743378.0], [6500000.0, null], [7000000.0, null], [7000000.0, null], [7000000.0, null], [7500000.0, null], [7500000.0, null], [7500000.0, null]]}, {"row": 10, "label": "タイアップ費", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "yen", "values": [[null, 1000000.0], [null, null], [null, null], [null, 880000.0], [null, 0.0], [0.0, 0.0], [null, 0.0], [0.0, 0.0], [800000.0, 800000.0], [0.0, 0.0], [0.0, 0.0], [0.0, 880000.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, null], [0.0, null], [0.0, null], [0.0, null], [0.0, null], [0.0, null], [0.0, null]]}, {"row": 11, "label": "CPA", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[1000.0, 13884.29231], [2000.0, 4573.344978], [4000.0, 6065.793826], [4000.0, 4637.440695], [4000.0, 3730.24952], [4000.0, 5707.971354], [4000.0, 5795.477995], [6000.0, 6571.750577], [5500.0, 7395.565953], [5000.0, 6888.193925], [5500.0, 7380.419312], [5500.0, 6161.972637], [4500.0, 4378.735172], [4500.0, 5509.670431], [4500.0, 3876.02015], [4500.0, 3940.457854], [4500.0, 3611.87895], [3500.0, null], [4500.0, null], [4500.0, null], [4500.0, null], [4500.0, null], [4500.0, null], [4500.0, null]]}, {"row": 12, "label": "応募数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 130.0], [600.0, 687.0], [959.0, 907.0], [740.0, 978.0], [864.0, 1042.0], [987.0, 768.0], [1100.0, 818.0], [917.0, 866.0], [1091.0, 887.0], [1200.0, 856.0], [1036.363636, 756.0], [1036.363636, 804.0], [1333.333333, 1450.0], [1333.333333, 974.0], [1333.333333, 1737.0], [1444.444444, 1566.0], [1444.444444, 1867.0], [1857.142857, null], [1555.555556, null], [1555.555556, null], [1555.555556, null], [1666.666667, null], [1666.666667, null], [1666.666667, null]]}, {"row": 13, "label": "名前送付数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 110.0], [504.0, 615.0], [805.56, 724.0], [621.6, 813.0], [725.76, 878.0], [829.08, 665.0], [924.0, 681.0], [770.28, 682.0], [916.44, 680.0], [1008.0, 573.0], [870.5454545, 548.0], [777.2727273, 630.0], [1000.0, 980.0], [1000.0, 726.0], [1000.0, 1246.0], [1083.333333, 1077.0], [1083.333333, 1322.0], [1392.857143, null], [1166.666667, null], [1166.666667, null], [1166.666667, null], [1250.0, null], [1250.0, null], [1250.0, null]]}, {"row": 14, "label": "名前送付率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.8461538462], [0.84, 0.8951965066], [0.84, 0.7982359427], [0.84, 0.8312883436], [0.84, 0.8426103647], [0.84, 0.8658854167], [0.84, 0.8325183374], [0.84, 0.7875288684], [0.84, 0.7666290868], [0.84, 0.6693925234], [0.84, 0.7248677249], [0.75, 0.7835820896], [0.75, 0.675862069], [0.75, 0.7453798768], [0.75, 0.7173287277], [0.75, 0.6877394636], [0.75, 0.7080878415], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null]]}, {"row": 15, "label": "ADアポ数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 30.0], [347.76, 238.0], [555.8364, 543.0], [428.904, 583.0], [500.7744, 605.0], [572.0652, 475.0], [637.56, 496.0], [531.4932, 465.0], [632.3436, 482.0], [695.52, 410.0], [600.6763636, 381.0], [505.2272727, 353.0], [650.0, 628.0], [650.0, 386.0], [650.0, 648.0], [704.1666667, 481.0], [704.1666667, 698.0], [905.3571429, null], [758.3333333, null], [758.3333333, null], [758.3333333, null], [812.5, null], [812.5, null], [812.5, null]]}, {"row": 16, "label": "ADアポ率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.2727272727], [0.69, 0.3869918699], [0.69, 0.75], [0.69, 0.717097171], [0.69, 0.6890660592], [0.69, 0.7142857143], [0.69, 0.7283406755], [0.69, 0.6818181818], [0.69, 0.7088235294], [0.69, 0.7155322862], [0.69, 0.6952554745], [0.65, 0.5603174603], [0.65, 0.6408163265], [0.65, 0.5316804408], [0.65, 0.5200642055], [0.65, 0.4466109564], [0.65, 0.5279878971], [0.65, null], [0.65, null], [0.65, null], [0.65, null], [0.65, null], [0.65, null], [0.65, null]]}, {"row": 17, "label": "AD参加数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 16.0], [215.6112, 170.0], [344.618568, 244.0], [265.92048, 303.0], [310.480128, 298.0], [354.680424, 299.0], [395.2872, 278.0], [329.525784, 249.0], [392.053032, 222.0], [431.2224, 245.0], [372.4193455, 202.0], [353.6590909, 207.0], [455.0, 348.0], [455.0, 257.0], [455.0, 331.0], [492.9166667, 249.0], [492.9166667, 323.0], [588.4821429, null], [530.8333333, null], [530.8333333, null], [530.8333333, null], [568.75, null], [568.75, null], [568.75, null]]}, {"row": 18, "label": "AD参加率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.5333333333], [0.62, 0.7142857143], [0.62, 0.4493554328], [0.62, 0.5197255575], [0.62, 0.4925619835], [0.62, 0.6294736842], [0.62, 0.560483871], [0.62, 0.535483871], [0.62, 0.4605809129], [0.62, 0.5975609756], [0.62, 0.530183727], [0.7, 0.5864022663], [0.7, 0.5541401274], [0.7, 0.6658031088], [0.7, 0.5108024691], [0.7, 0.5176715177], [0.7, 0.4627507163], [0.65, null], [0.7, null], [0.7, null], [0.7, null], [0.7, null], [0.7, null], [0.7, null]]}, {"row": 19, "label": "応募～AD参加率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.1230769231], [0.359352, 0.2474526929], [0.359352, 0.2690187431], [0.359352, 0.3098159509], [0.359352, 0.2859884837], [0.359352, 0.3893229167], [0.359352, 0.3398533007], [0.359352, 0.2875288684], [0.359352, 0.2502818489], [0.359352, 0.2862149533], [0.359352, 0.2671957672], [0.34125, 0.2574626866], [0.34125, 0.24], [0.34125, 0.2638603696], [0.34125, 0.1905584341], [0.34125, 0.1590038314], [0.34125, 0.1730048206], [0.316875, null], [0.34125, null], [0.34125, null], [0.34125, null], [0.34125, null], [0.34125, null], [0.34125, null]]}, {"row": 20, "label": "面談アポ数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 2.0], [174.645072, 154.0], [279.1410401, 162.0], [215.3955888, 263.0], [251.4889037, 256.0], [287.2911434, 348.0], [320.182632, 309.0], [266.915885, 227.0], [317.5629559, 201.0], [349.290144, 225.0], [301.6596698, 178.0], [282.9272727, 205.0], [364.0, 241.0], [364.0, 254.0], [364.0, 308.0], [394.3333333, 291.0], [394.3333333, 269.0], [500.2098214, null], [424.6666667, null], [424.6666667, null], [424.6666667, null], [455.0, null], [455.0, null], [455.0, null]]}, {"row": 21, "label": "面談アポ率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.125], [0.81, 0.9058823529], [0.81, 0.6639344262], [0.81, 0.8679867987], [0.81, 0.8590604027], [0.81, 1.163879599], [0.81, 1.111510791], [0.81, 0.9116465863], [0.81, 0.9054054054], [0.81, 0.9183673469], [0.81, 0.8811881188], [0.8, 0.9903381643], [0.8, 0.6925287356], [0.8, 0.9883268482], [0.8, 0.9305135952], [0.8, 1.168674699], [0.8, 0.8328173375], [0.85, null], [0.8, null], [0.8, null], [0.8, null], [0.8, null], [0.8, null], [0.8, null]]}, {"row": 22, "label": "面談参加数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 2.0], [136.2231562, 98.0], [217.7300113, 136.0], [168.0085593, 218.0], [196.1613449, 205.0], [224.0870919, 283.0], [249.742453, 262.0], [208.1943903, 192.0], [247.6991056, 176.0], [272.4463123, 186.0], [234.2990655, 151.0], [212.1954545, 160.0], [273.0, 192.0], [273.0, 208.0], [273.0, 263.0], [295.75, 242.0], [295.75, 230.0], [375.1573661, null], [318.5, null], [318.5, null], [318.5, null], [341.25, null], [341.25, null], [341.25, null]]}, {"row": 23, "label": "面談参加単価", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "yen", "values": [[null, 902479.0], [null, 32060.08163], [null, 40453.49265], [null, 20804.66514], [null, 18960.58537], [null, 15490.18375], [null, 18094.27863], [null, 29641.33333], [null, 37271.97159], [null, 31700.50538], [null, 36950.97351], [null, 30963.9125], [21978.02198, 33068.57292], [21978.02198, 25800.09135], [21978.02198, 25599.41825], [21978.02198, 25498.99587], [21978.02198, 29319.03478], [17326.06257, null], [21978.02198, null], [21978.02198, null], [21978.02198, null], [21978.02198, null], [21978.02198, null], [21978.02198, null]]}, {"row": 24, "label": "面談参加率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 1.0], [0.78, 0.6363636364], [0.78, 0.8395061728], [0.78, 0.8288973384], [0.78, 0.80078125], [0.78, 0.8132183908], [0.78, 0.8478964401], [0.78, 0.845814978], [0.78, 0.8756218905], [0.78, 0.8266666667], [0.7767, 0.8483146067], [0.75, 0.7804878049], [0.75, 0.7966804979], [0.75, 0.8188976378], [0.75, 0.8538961039], [0.75, 0.8316151203], [0.75, 0.8550185874], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null], [0.75, null]]}, {"row": 25, "label": "応募～面談参加率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.01538461538], [0.2270385936, 0.1426491994], [0.2270385936, 0.1499448732], [0.2270385936, 0.2229038855], [0.2270385936, 0.1967370441], [0.2270385936, 0.3684895833], [0.2270385936, 0.3202933985], [0.2270385936, 0.2217090069], [0.2270385936, 0.198421646], [0.2270385936, 0.2172897196], [0.2260780457, 0.1997354497], [0.20475, 0.1990049751], [0.20475, 0.1324137931], [0.20475, 0.2135523614], [0.20475, 0.1514104778], [0.20475, 0.1545338442], [0.20475, 0.1231922871], [0.2020078125, null], [0.20475, null], [0.20475, null], [0.20475, null], [0.20475, null], [0.20475, null], [0.20475, null]]}, {"row": 26, "label": "当月面談者の決済数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 0.0], [15.0, 29.0], [25.0, 30.0], [30.0, 35.0], [35.0, 12.0], [40.0, 35.0], [45.0, 34.0], [37.5, 24.0], [40.0, 22.0], [42.5, 23.0], [35.0, 19.0], [30.0, 36.0], [40.0, null], [42.5, null], [42.5, null], [45.0, null], [45.0, null], [40.0, null], [47.5, null], [47.5, null], [47.5, null], [50.0, null], [50.0, null], [50.0, null]]}, {"row": 27, "label": "当月決済割合", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, 0.0], [0.5, 0.9666666667], [0.5, 0.7317073171], [0.5, 0.6034482759], [0.5, 0.3157894737], [0.5, 0.4487179487], [0.5, 0.4473684211], [0.5, 0.347826087], [0.5, 0.328358209], [0.5, 0.4339622642], [0.5, 0.3653846154], [0.5, 0.5454545455], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null], [0.5, null]]}, {"row": 28, "label": "前月面談者の決済数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 0.0], [12.0, 1.0], [20.0, 11.0], [24.0, 19.0], [28.0, 22.0], [32.0, 35.0], [36.0, 32.0], [30.0, 30.0], [32.0, 31.0], [34.0, 20.0], [28.0, 26.0], [24.0, 20.0], [3.2, null], [3.4, null], [3.4, null], [3.6, null], [3.6, null], [3.2, null], [3.8, null], [3.8, null], [3.8, null], [4.0, null], [4.0, null], [4.0, null]]}, {"row": 29, "label": "前月からの決済割合", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, null], [0.4, 0.03333333333], [0.4, 0.2682926829], [0.4, 0.3275862069], [0.4, 0.5789473684], [0.4, 0.4487179487], [0.4, 0.4210526316], [0.4, 0.4347826087], [0.4, 0.4626865672], [0.4, 0.3773584906], [0.4, 0.5], [0.4, 0.303030303], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null], [0.4, null]]}, {"row": 30, "label": "前々月以前から / の決済数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 0.0], [3.0, 0.0], [5.0, 0.0], [6.0, 4.0], [7.0, 4.0], [8.0, 8.0], [9.0, 10.0], [7.5, 15.0], [8.0, 14.0], [8.5, 9.0], [7.0, 7.0], [6.0, 10.0], [8.0, null], [8.5, null], [8.5, null], [9.0, null], [9.0, null], [8.0, null], [9.5, null], [9.5, null], [9.5, null], [10.0, null], [10.0, null], [10.0, null]]}, {"row": 31, "label": "前々月以前から / の決済割合", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, null], [0.1, 0.0], [0.1, 0.0], [0.1, 0.06896551724], [0.1, 0.1052631579], [0.1, 0.1025641026], [0.1, 0.1315789474], [0.1, 0.2173913043], [0.1, 0.2089552239], [0.1, 0.1698113208], [0.1, 0.1346153846], [0.1, 0.1515151515], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null], [0.1, null]]}, {"row": 32, "label": "決済数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 0.0], [30.0, 30.0], [50.0, 41.0], [60.0, 58.0], [70.0, 38.0], [80.0, 78.0], [90.0, 76.0], [75.0, 69.0], [80.0, 67.0], [85.0, 53.0], [70.0, 52.0], [60.0, 66.0], [80.0, 44.0], [85.0, null], [85.0, null], [90.0, null], [90.0, null], [80.0, null], [95.0, null], [95.0, null], [95.0, null], [100.0, null], [100.0, null], [100.0, null]]}, {"row": 33, "label": "着金数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, 27.0], [null, 41.0], [null, 49.0], [null, 47.0], [null, 78.0], [null, 78.0], [75.0, 69.0], [80.0, 67.0], [85.0, 56.0], [70.0, 52.0], [60.0, 63.0], [80.0, 44.0], [85.0, 53.0], [85.0, 68.0], [90.0, 53.0], [90.0, 49.0], [80.0, null], [95.0, null], [95.0, null], [95.0, null], [100.0, null], [100.0, null], [100.0, null]]}, {"row": 34, "label": "着金単価", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "yen", "values": [[null, null], [null, 116366.2222], [null, 134187.1951], [null, 92559.53061], [null, 82700.42553], [null, 56201.5641], [null, 60778.21795], [null, 82480.23188], [null, 97908.46269], [null, 105290.9643], [null, 107299.9423], [null, 78638.50794], [75000.0, 144299.2273], [70588.23529, 101253.1887], [70588.23529, 99009.51471], [72222.22222, 116429.3774], [72222.22222, 137619.9592], [81250.0, null], [73684.21053, null], [73684.21053, null], [73684.21053, null], [75000.0, null], [75000.0, null], [75000.0, null]]}, {"row": 35, "label": "着金率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, null], [null, 0.2755102041], [null, 0.3014705882], [null, 0.2247706422], [null, 0.2292682927], [null, 0.2756183746], [null, 0.2977099237], [0.3602402537, 0.359375], [0.3229725025, 0.3806818182], [0.3119880731, 0.3010752688], [0.2987634621, 0.3443708609], [0.2827581775, 0.39375], [0.293040293, 0.2291666667], [0.3113553114, 0.2548076923], [0.3113553114, 0.2585551331], [0.3043110735, 0.2190082645], [0.3043110735, 0.2130434783], [0.2132438471, null], [0.2982731554, null], [0.2982731554, null], [0.2982731554, null], [0.293040293, null], [0.293040293, null], [0.293040293, null]]}, {"row": 36, "label": "応募～着金率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[null, null], [null, 0.03930131004], [null, 0.04520396913], [null, 0.05010224949], [null, 0.04510556622], [null, 0.1015625], [null, 0.09535452323], [0.08178844057, 0.07967667436], [0.07332722273, 0.07553551297], [0.07083333333, 0.06542056075], [0.06754385965, 0.06878306878], [0.05789473684, 0.07835820896], [0.06, 0.03034482759], [0.06375, 0.05441478439], [0.06375, 0.03914795625], [0.06230769231, 0.03384418902], [0.06230769231, 0.02624531334], [0.04307692308, null], [0.06107142857, null], [0.06107142857, null], [0.06107142857, null], [0.06, null], [0.06, null], [0.06, null]]}, {"row": 38, "label": "所属者数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, 0.0], [30.0, 30.0], [40.0, 44.0], [97.1, 83.0], [116.97, 134.0], [137.879, 172.0], [159.5153, 234.0], [240.0, 312.0], [295.0, 368.0], [348.0, 368.0], [384.0, 370.0], [399.0, 399.0], [435.75, 394.0], [457.4, 420.0], [495.73, 440.0], [539.646, 464.0], [584.4292, 466.0], [624.88584, 278.0], [671.727168, 0.0], [719.0954336, 0.0], [766.5690867, 0.0], [816.3138173, 0.0], [866.2627635, 0.0], [916.2525527, 0.0]]}, {"row": 39, "label": "クーリングオフ", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, null], [null, 6.0], [2.4, 0.0], [2.8, 7.0], [3.2, 4.0], [3.6, 4.0], [3.0, 5.0], [3.2, 12.0], [3.4, 8.0], [3.5, 6.0], [3.0, 6.0], [4.0, 1.0], [4.25, 0.0], [4.25, 5.0], [4.5, 5.0], [4.5, 4.0], [4.0, null], [4.75, null], [4.75, null], [4.75, null], [5.0, null], [5.0, null], [5.0, null]]}, {"row": 40, "label": "クーオフ率", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "percent", "values": [[0.05, 0.0], [0.05, 0.0], [0.05, 0.1463414634], [0.05, 0.0], [0.05, 0.1842105263], [0.05, 0.05128205128], [0.05, 0.05263157895], [0.04, 0.07246376812], [0.04, 0.1791044776], [0.04, 0.1509433962], [0.05, 0.1153846154], [0.05, 0.09090909091], [0.05, 0.02272727273], [0.05, 0.0], [0.05, 0.07352941176], [0.05, 0.09433962264], [0.05, 0.08163265306], [0.05, null], [0.05, null], [0.05, null], [0.05, null], [0.05, null], [0.05, null], [0.05, null]]}, {"row": 41, "label": "休会数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, 0.0], [null, 0.0], [2.9, 4.0], [5.9, 10.0], [7.05, 30.0], [8.25, 54.0], [10.75, 69.0], [13.15, 81.0], [15.7, 89.0], [96.0, 78.0], [76.8, 63.0], [79.8, 70.0], [65.3625, 70.0], [68.61, 73.0], [74.3595, 88.0], [80.9469, 104.0], [87.66438, null], [93.732876, null], [100.7590752, null], [107.864315, null], [114.985363, null], [122.4470726, null], [129.9394145, null]]}, {"row": 42, "label": "退会者", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, 0.0], [null, 1.0], [2.9, 2.0], [5.9, 4.0], [7.05, 9.0], [8.25, 6.0], [10.75, 18.0], [13.15, 34.0], [15.7, 35.0], [19.2, 25.0], [19.2, 36.0], [19.95, 16.0], [21.7875, 20.0], [22.87, 25.0], [24.7865, 21.0], [26.9823, 28.0], [29.22146, null], [31.244292, null], [33.5863584, null], [35.95477168, null], [38.32845434, null], [40.81569087, null], [43.31313817, null]]}, {"row": 43, "label": "レッスン入金数", "section": "数値関係", "subsection": "BitStar Next（数値）", "type": "count", "values": [[null, null], [null, 8.0], [null, 37.0], [58.0, 77.0], [118.0, 113.0], [141.0, 129.0], [165.0, 170.0], [215.0, 220.0], [263.0, 241.0], [314.0, 236.0], [270.0, 261.0], [300.0, 300.0], [332.0, 308.0], [366.0, 330.0], [400.0, 342.0], [436.0, 355.0], [472.0, 334.0], [504.0, 278.0], [542.0, null], [580.0, null], [618.0, null], [658.0, null], [698.0, null], [738.0, null]]}, {"row": 48, "label": "新規所属数(事務手数料回収数)", "section": "数値関係", "subsection": "BitStar Boost（数値）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 7.0], [null, 2.0], [10.0, 2.0], [10.0, 4.0], [10.0, 13.0], [15.0, 15.0], [15.0, 11.0], [15.0, null], [15.0, null], [15.0, null], [15.0, null], [15.0, null], [15.0, null], [15.0, null]]}, {"row": 49, "label": "退所数", "section": "数値関係", "subsection": "BitStar Boost（数値）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 4.0], [null, 2.0], [null, 5.0], [null, 2.0], [null, 1.0], [3.0, 2.0], [3.2, 11.0], [3.4, 1.0], [3.7, 4.0], [4.0, 23.0], [4.3, null], [4.6, null], [4.9, null], [5.2, null], [5.5, null], [5.8, null], [6.1, null]]}, {"row": 50, "label": "所属数", "section": "数値関係", "subsection": "BitStar Boost（数値）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 136.0], [null, 135.0], [null, 135.0], [null, 140.0], [140.0, 141.0], [150.0, 141.0], [160.0, 134.0], [170.0, 146.0], [185.0, 157.0], [200.0, 145.0], [215.0, 145.0], [230.0, 145.0], [245.0, 145.0], [260.0, 145.0], [275.0, 145.0], [290.0, 145.0], [305.0, 145.0]]}, {"row": 65, "label": "その他", "section": "施策関係", "subsection": "BitStar Live（数値）", "type": "count", "values": [[null, null], [null, 1410000.0], [null, 2027500.0], [null, 3028079.409], [null, 2849762.955], [null, 4675843.659], [null, 4983175.341], [3084132.39, null], [null, 2469797.42], [2622555.675, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 70, "label": "着金ベース売上※税別(クーオフ引いてる)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 5640000.0], [null, 8110000.0], [13340000.0, 12115296.64], [16984100.0, 11442341.82], [19787091.1, 18757417.64], [22315063.77, 19973701.36], [21076750.0, 19502565.73], [23568650.0, 18887412.36], [26148900.0, 16946753.73], [21659100.0, 17663583.82], [20614500.0, 20789693.0], [25565662.5, 18598269.0], [27614570.0, 21160669.55], [28771797.5, 23500584.45], [30702734.5, 20774913.91], [31951207.74, 20225584.73], [31165641.55, 9501749.727], [35169140.81, 666841.0909], [36516959.75, 9.090909091], [37730554.45, 9.090909091], [40252655.04, 9.090909091], [41545081.01, 9.090909091], [42837566.2, 9.090909091]]}, {"row": 71, "label": "着金ベース粗利※税別(クーオフ引いてる)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 5640000.0], [null, 8110000.0], [null, 12112317.64], [null, 11399051.82], [null, 18703374.64], [null, 19932701.36], [null, 19454519.73], [null, 18487090.36], [null, 16822211.73], [null, 17275834.82], [null, 20611467.0], [null, 18136866.0], [null, 20777027.55], [null, 23284742.45], [null, 20451253.91], [null, 19279272.73], [null, 8851420.727], [null, 277846.0909], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091]]}, {"row": 72, "label": "入会金", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 5400000.0], [null, 8200000.0], [12000000.0, 9800000.0], [14000000.0, 9400000.0], [16000000.0, 15600000.0], [18000000.0, 15600000.0], [15000000.0, 13800000.0], [16000000.0, 13400000.0], [17000000.0, 11200000.0], [14000000.0, 10400000.0], [12000000.0, 12600000.0], [16000000.0, 8800000.0], [17000000.0, 10600000.0], [17000000.0, 13600000.0], [18000000.0, 10600000.0], [18000000.0, 9800000.0], [16000000.0, 0.0], [19000000.0, 0.0], [19000000.0, 0.0], [19000000.0, 0.0], [20000000.0, 0.0], [20000000.0, 0.0], [20000000.0, 0.0]]}, {"row": 73, "label": "返金", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, null], [null, 1200000.0], [400000.0, 0.0], [600000.0, 1400000.0], [600000.0, 800000.0], [800000.0, 800000.0], [600000.0, 1000000.0], [600000.0, 2400000.0], [600000.0, 1600000.0], [800000.0, 1200000.0], [600000.0, 1200000.0], [800000.0, 200000.0], [800000.0, 0.0], [800000.0, 1000000.0], [1000000.0, 1000000.0], [1000000.0, 800000.0], [800000.0, 0.0], [1000000.0, 0.0], [1000000.0, 0.0], [1000000.0, 0.0], [1000000.0, 0.0], [1000000.0, 0.0], [1000000.0, 0.0]]}, {"row": 74, "label": "TS【合計】※全て税抜", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "count", "values": [[null, 0.0], [null, 240000.0], [null, 1110000.0], [1740000.0, 2315296.636], [3584100.0, 3442341.818], [4387091.1, 3957417.636], [5115063.77, 5173701.364], [6676750.0, 6702565.727], [8168650.0, 7887412.364], [9748900.0, 7346753.727], [8459100.0, 8463583.818], [9214500.0, 9389693.0], [10365662.5, 9998269.0], [11414570.0, 10560669.55], [12571797.5, 10900584.45], [13702734.5, 11174913.91], [14951207.74, 11225584.73], [15965641.55, 9501749.727], [17169140.81, 666841.0909], [18516959.75, 9.090909091], [19730554.45, 9.090909091], [21252655.04, 9.090909091], [22545081.01, 9.090909091], [23837566.2, 9.090909091]]}, {"row": 75, "label": "MG費", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, 240000.0], [null, 1110000.0], [1740000.0, 2310000.0], [3540000.0, 3390000.0], [4230000.0, 3870000.0], [4950000.0, 5100000.0], [6450000.0, 6600000.0], [7890000.0, 7230000.0], [9420000.0, 7080000.0], [8100000.0, 7830000.0], [9000000.0, 9000000.0], [9960000.0, 9240000.0], [10980000.0, 9900000.0], [12000000.0, 10260000.0], [13080000.0, 10650000.0], [14160000.0, 10020000.0], [15120000.0, 8340000.0], [16260000.0, 0.0], [17400000.0, 0.0], [18540000.0, 0.0], [19740000.0, 0.0], [20940000.0, 0.0], [22140000.0, 0.0]]}, {"row": 76, "label": "案件売上(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, 0.0], [null, 0.0], [0.0, 0.0], [30000.0, 20884.0], [96515.3, 55625.0], [111660.71, 69375.0], [168000.0, 60200.0], [206500.0, 171887.0], [243600.0, 145267.0], [268800.0, 125250.0], [119700.0, 81164.0], [130725.0, 105583.0], [137220.0, 138950.0], [247865.0, 196550.0], [269823.0, 151364.0], [409100.44, 113150.0], [437420.088, 489651.0], [470209.0176, 179550.0], [647185.8902, 0.0], [689912.178, 0.0], [979576.5808, 0.0], [1039515.316, 0.0], [1099503.063, 0.0]]}, {"row": 77, "label": "TikTokライブ(/1.1で税抜きに)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "count", "values": [[null, null], [null, 0.0], [null, 0.0], [0.0, 1633.636364], [14100.0, 8791.818182], [33000.0, 9253.636364], [21500.0, 4326.363636], [10750.0, 9972.727273], [13150.0, 16686.36364], [15700.0, 86872.72727], [13500.0, 17321.81818], [15000.0, 143062.0], [166000.0, 92282.0], [183000.0, 163494.5455], [200000.0, 315515.4545], [218000.0, 33730.90909], [236000.0, 313402.7273], [252000.0, 29962.72727], [271000.0, 9.090909091], [290000.0, 9.090909091], [309000.0, 9.090909091], [329000.0, 9.090909091], [349000.0, 9.090909091], [369000.0, 9.090909091]]}, {"row": 78, "label": "ミクチャ売上(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, 0.0], [null, 0.0], [0.0, 3663.0], [0.0, 22666.0], [27575.8, 22539.0], [31903.06, 0.0], [48000.0, 32393.0], [59000.0, 468839.0], [69600.0, 34614.0], [76800.0, 491012.0], [79800.0, 165467.0], [108937.5, 560404.0], [114350.0, 358225.0], [123932.5, 128519.0], [134911.5, 339819.0], [146107.3, 779032.0], [156221.46, 642136.0], [167931.792, 487282.0], [179773.8584, 0.0], [191642.2717, 0.0], [204078.4543, 0.0], [216565.6909, 0.0], [229063.1382, 0.0]]}, {"row": 79, "label": "発生ベース売上※税別(クーオフ引いてる)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 5640684.0], [null, 8116709.636], [null, 12144746.82], [null, 11429178.64], [null, 18715473.36], [null, 20058439.73], [null, 19573495.36], [null, 18535452.73], [null, 16766362.82], [null, 17377627.0], [null, 20638598.0], [null, 18109921.55], [null, 20980524.45], [null, 23144964.91], [null, 20774059.73], [null, 19260750.73], [null, 8340009.091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091]]}, {"row": 80, "label": "発生ベース粗利※税別(クーオフ引いてる)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, 5637705.0], [null, 8099119.636], [null, 12101578.82], [null, 11392603.64], [null, 18650427.36], [null, 19694867.73], [null, 19487053.36], [null, 18079653.73], [null, 16612736.82], [null, 16916024.0], [null, 20321306.0], [null, 17882529.55], [null, 20620714.45], [null, 22501952.91], [null, 19926130.73], [null, 18692205.73], [null, 8340009.091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091]]}, {"row": 81, "label": "入会金(着金ベースと同じ)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 5400000.0], [null, 8200000.0], [null, 9800000.0], [null, 9400000.0], [null, 15600000.0], [null, 15600000.0], [null, 13800000.0], [null, 13400000.0], [null, 11200000.0], [null, 10400000.0], [null, 12600000.0], [null, 8800000.0], [null, 10600000.0], [null, 13600000.0], [null, 10600000.0], [null, 9800000.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 82, "label": "MG費", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 240000.0], [null, 1110000.0], [null, 2310000.0], [null, 3390000.0], [null, 3870000.0], [null, 5100000.0], [null, 6600000.0], [null, 7230000.0], [null, 7080000.0], [null, 7830000.0], [null, 9000000.0], [null, 9240000.0], [null, 9900000.0], [null, 10260000.0], [null, 10650000.0], [null, 10020000.0], [null, 8340000.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 83, "label": "案件粗利(ギャラ抜き)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 20884.0], [null, 29925.0], [null, 32800.0], [null, 19200.0], [null, 147887.0], [null, 84517.0], [null, 26400.0], [null, 50364.0], [null, 50183.0], [null, 83750.0], [null, 75000.0], [null, 41364.0], [null, 39300.0], [null, 112501.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 84, "label": "TikTokライブ", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "count", "values": [[null, 0.0], [null, 0.0], [null, 1633.636364], [null, 8791.818182], [null, 9253.636364], [null, 4326.363636], [null, 9972.727273], [null, 16686.36364], [null, 86872.72727], [null, 17321.81818], [null, 143062.0], [null, 92282.0], [null, 163494.5455], [null, 315515.4545], [null, 33730.90909], [null, 313402.7273], [null, 29962.72727], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091]]}, {"row": 85, "label": "ミクチャ粗利(ギャラ抜き)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 684.0], [null, 5076.0], [null, 5071.0], [null, 0.0], [null, 8347.0], [null, 129267.0], [null, 8922.0], [null, 134063.0], [null, 42641.0], [null, 154201.0], [null, 96133.0], [null, 22677.0], [null, 90009.0], [null, 209870.0], [null, 171357.0], [null, 98287.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 86, "label": "着金原価(BS用)【合計】", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 2979.0], [null, 56223.0], [null, 72964.0], [null, 53933.0], [null, 48046.0], [null, 400322.0], [null, 127287.0], [null, 389769.0], [null, 180476.0], [null, 461403.0], [null, 385865.0], [null, 215842.0], [null, 323660.0], [null, 946312.0], [null, 650329.0], [null, 388995.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 87, "label": "案件(ギャラ)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 25700.0], [null, 36575.0], [null, 41000.0], [null, 24000.0], [null, 60750.0], [null, 98850.0], [null, 30800.0], [null, 55400.0], [null, 55200.0], [null, 121550.0], [null, 110000.0], [null, 73850.0], [null, 377150.0], [null, 179550.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 88, "label": "配信(ギャラ)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 2979.0], [null, 17590.0], [null, 17468.0], [null, 0.0], [null, 24046.0], [null, 339572.0], [null, 25692.0], [null, 356949.0], [null, 122826.0], [null, 406203.0], [null, 262092.0], [null, 105842.0], [null, 249810.0], [null, 569162.0], [null, 470779.0], [null, 388995.0], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 89, "label": "スタジオ代+講師代(宣材代は含めない)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "count", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 12933.0], [null, 18921.0], [null, 12933.0], [null, 0.0], [null, 0.0], [null, 2745.0], [null, 2020.0], [null, 2250.0], [null, 0.0], [null, 2223.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 90, "label": "発生原価【合計】", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 2979.0], [null, 17590.0], [null, 56101.0], [null, 55496.0], [null, 77979.0], [null, 363572.0], [null, 86442.0], [null, 458544.0], [null, 155646.0], [null, 463853.0], [null, 317292.0], [null, 229615.0], [null, 362033.0], [null, 643012.0], [null, 847929.0], [null, 568545.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 91, "label": "案件(ギャラ)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 25700.0], [null, 36575.0], [null, 41000.0], [null, 24000.0], [null, 60750.0], [null, 98850.0], [null, 30800.0], [null, 55400.0], [null, 55200.0], [null, 121550.0], [null, 110000.0], [null, 73850.0], [null, 377150.0], [null, 179550.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 92, "label": "配信(ギャラ)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 0.0], [null, 2979.0], [null, 17590.0], [null, 17468.0], [null, 0.0], [null, 24046.0], [null, 339572.0], [null, 25692.0], [null, 356949.0], [null, 122826.0], [null, 406203.0], [null, 262092.0], [null, 105842.0], [null, 249810.0], [null, 569162.0], [null, 470779.0], [null, 388995.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 93, "label": "スタジオ代+講師代(宣材代は含めない)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "count", "values": [[null, 0.0], [null, 0.0], [null, 0.0], [null, 12933.0], [null, 18921.0], [null, 12933.0], [null, 0.0], [null, 0.0], [null, 2745.0], [null, 2020.0], [null, 2250.0], [null, 0.0], [null, 2223.0], [null, 2223.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 95, "label": "販管費(ギャラ以外)【合計】", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 8832189.0], [null, 8667849.0], [null, 12924217.0], [null, 12672070.0], [null, 12592811.0], [null, 12874023.0], [null, 13969229.0], [null, 15001737.0], [null, 17260216.0], [null, 17780642.0], [null, 13668047.0], [null, 16007325.0], [null, 18554303.0], [null, 17849444.0], [null, 18798186.0], [null, 19098186.0], [null, 19098186.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 96, "label": "販管費(LIV立替)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 5096368.0], [null, 7324704.0], [null, 11689185.0], [null, 10460645.0], [null, 11228887.0], [null, 11570444.0], [null, 12660857.0], [null, 13796200.0], [null, 16064063.0], [null, 16601539.0], [null, 12490983.0], [null, 14646947.0], [null, 17193925.0], [null, 16571644.0], [null, 17508571.0], [null, 17808571.0], [null, 17808571.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 97, "label": "販管費(BitStar立替)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, 3735821.0], [null, 1343145.0], [null, 1235032.0], [null, 2211425.0], [null, 1363924.0], [null, 1303579.0], [null, 1308372.0], [null, 1205537.0], [null, 1196153.0], [null, 1179103.0], [null, 1177064.0], [null, 1360378.0], [null, 1360378.0], [null, 1277800.0], [null, 1289615.0], [null, 1289615.0], [null, 1289615.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 98, "label": "単月利益(LIV用)着金ベース", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, -8832189.0], [null, -3027849.0], [null, -4814217.0], [null, -559752.3636], [null, -1193759.182], [null, 5829351.636], [null, 5963472.364], [null, 4452782.727], [null, 1226874.364], [null, -958430.2727], [null, 3607787.818], [null, 4604142.0], [null, -417437.0], [null, 2927583.545], [null, 4486556.455], [null, 1353067.909], [null, 181086.7273], [null, 8851420.727], [null, 277846.0909], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091], [null, 9.090909091]]}, {"row": 99, "label": "営業利益率", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "percent", "values": [[null, null], [null, -0.5368526596], [null, -0.5936149199], [null, -0.04621348122], [null, -0.104724428], [null, 0.3116737888], [null, 0.2991803396], [null, 0.2288816578], [null, 0.06636384307], [null, -0.05697409403], [null, 0.2088343548], [null, 0.2233776955], [null, -0.02301593892], [null, 0.1409048305], [null, 0.1926822452], [null, 0.06616063324], [null, 0.00939281942], [null, 1.0], [null, 1.0], [null, 1.0], [null, 1.0], [null, 1.0], [null, 1.0], [null, 1.0]]}, {"row": 100, "label": "リクープ(着金ベース)", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, -8832189.0], [null, -11860038.0], [null, -16674255.0], [null, -17234007.36], [null, -18427766.55], [null, -12598414.91], [null, -6634942.545], [null, -2182159.818], [null, -955285.4545], [null, -1913715.727], [null, 1694072.091], [null, 6298214.091], [null, 5880777.091], [null, 8808360.636], [null, 13294917.09], [null, 14647985.0], [null, 14829071.73], [null, 23680492.45], [null, 23958338.55], [null, 23958347.64], [null, 23958356.73], [null, 23958365.82], [null, 23958374.91], [null, 23958384.0]]}, {"row": 101, "label": "累計利益", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, -24784173.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 102, "label": "人件費", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "yen", "values": [[null, null], [null, 1499099.0], [null, 1782445.0], [null, 2201060.0], [null, 1845729.0], [null, 2640137.0], [null, 2779511.0], [null, 2661264.0], [null, 3235036.0], [null, 3133631.0], [null, 3350021.0], [null, 3993103.0], [null, 3628072.0], [null, 3907790.0], [null, 4324029.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 103, "label": "人件費率", "section": "費用関係", "subsection": "BitStar Next（費用）", "type": "percent", "values": [[null, null], [null, 0.265797695], [null, 0.2197836005], [null, 0.1816761129], [null, 0.1613069273], [null, 0.1407516243], [null, 0.139158534], [null, 0.1364571225], [null, 0.1712800005], [null, 0.1849103994], [null, 0.1896569255], [null, 0.1920712826], [null, 0.195075789], [null, 0.1846723229], [null, 0.183996658], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 106, "label": "着金ベース売上(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 6974048.0], [null, 6505774.0], [null, 3606846.0], [null, 5944111.0], [null, 4758501.0], [null, 6514619.0], [6715000.0, 6840285.0], [6982962.857, 5422470.0], [8082714.286, 4550593.364], [9365642.857, 8549570.909], [10112857.14, 5975000.273], [11474357.14, 3934883.0], [12264428.57, 9586.363636], [13754500.0, 9586.363636], [14587428.57, 9586.363636], [16206071.43, 9586.363636], [17081857.14, 9586.363636], [18829071.43, 9586.363636]]}, {"row": 107, "label": "アドセンス", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 5225048.0], [null, 4425774.0], [null, 3606846.0], [null, 4529111.0], [null, 3930774.0], [null, 4342168.0], [3600000.0, 4402745.0], [3209820.0, 3349153.0], [4080000.0, 3320507.0], [4440000.0, 4190568.0], [4800000.0, 4579913.0], [5160000.0, 2976273.0], [5520000.0, null], [5880000.0, null], [6240000.0, null], [6600000.0, null], [6960000.0, null], [7320000.0, null]]}, {"row": 108, "label": "タイアップ", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1749000.0], [null, 2080000.0], [null, 0.0], [null, 1415000.0], [null, 827727.0], [null, 2100000.0], [3000000.0, 2413000.0], [3657142.857, 2025000.0], [3885714.286, 1090500.0], [4757142.857, 4207802.0], [5142857.143, 1180000.0], [6142857.143, 945000.0], [6571428.571, null], [7700000.0, null], [8171428.571, null], [9428571.429, null], [9942857.143, null], [11328571.43, null]]}, {"row": 109, "label": "LIVE配信", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 2451.0], [15000.0, 4540.0], [16000.0, 8317.0], [17000.0, 9586.363636], [18500.0, 1200.909091], [20000.0, 105087.2727], [21500.0, 13610.0], [23000.0, 9586.363636], [24500.0, 9586.363636], [26000.0, 9586.363636], [27500.0, 9586.363636], [29000.0, 9586.363636], [30500.0, 9586.363636]]}, {"row": 110, "label": "事務手数料", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 70000.0], [100000.0, 20000.0], [100000.0, 40000.0], [100000.0, 130000.0], [150000.0, 150000.0], [150000.0, 110000.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0]]}, {"row": 111, "label": "着金ベース粗利(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 2308084.0], [2300110.0, 2134407.0], [2570788.0, 1271289.0], [2841308.0, 1535678.0], [3134761.0, 1357189.0], [3401161.0, 1780322.0], [2065000.0, 2230678.0], [2198455.0, 1715528.0], [2497000.0, 1310166.364], [2943500.0, 2795232.909], [3170000.0, 1560899.273], [3611500.0, 1195119.0], [3853000.0, 9586.363636], [4339500.0, 9586.363636], [4596000.0, 9586.363636], [5127500.0, 9586.363636], [5399000.0, 9586.363636], [5975500.0, 9586.363636]]}, {"row": 112, "label": "アドセンス", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1349084.0], [2291400.0, 1096407.0], [2560896.0, 931289.0], [2830392.0, 1104980.0], [3072938.0, 1014917.0], [3288535.0, 1121144.0], [900000.0, 1136774.0], [802455.0, 864756.0], [1020000.0, 857353.0], [1110000.0, 1079169.0], [1200000.0, 867630.0], [1290000.0, 782873.0], [1380000.0, null], [1470000.0, null], [1560000.0, null], [1650000.0, null], [1740000.0, null], [1830000.0, null]]}, {"row": 113, "label": "タイアップ", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 959000.0], [null, 1038000.0], [null, 340000.0], [null, 430698.0], [null, 272272.0], [null, 636727.0], [1050000.0, 1069364.0], [1280000.0, 802455.0], [1360000.0, 313227.0], [1665000.0, 1564863.0], [1800000.0, 478182.0], [2150000.0, 398636.0], [2300000.0, null], [2695000.0, null], [2860000.0, null], [3300000.0, null], [3480000.0, null], [3965000.0, null]]}, {"row": 114, "label": "LIVE配信", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [8710.0, 0.0], [9892.0, 0.0], [10916.0, 0.0], [11823.0, 0.0], [12626.0, 2451.0], [15000.0, 4540.0], [16000.0, 8317.0], [17000.0, 9586.363636], [18500.0, 1200.909091], [20000.0, 105087.2727], [21500.0, 13610.0], [23000.0, 9586.363636], [24500.0, 9586.363636], [26000.0, 9586.363636], [27500.0, 9586.363636], [29000.0, 9586.363636], [30500.0, 9586.363636]]}, {"row": 115, "label": "事務手数料", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [50000.0, 70000.0], [100000.0, 20000.0], [100000.0, 20000.0], [100000.0, 40000.0], [100000.0, 130000.0], [150000.0, 150000.0], [150000.0, 110000.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0], [150000.0, 0.0]]}, {"row": 116, "label": "着金原価", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 4665964.0], [null, 4371367.0], [null, 3075557.0], [null, 4408433.0], [null, 3471312.0], [null, 4684297.0], [null, 4609607.0], [null, 3706942.0], [null, 3240427.0], [null, 5754338.0], [null, 4414101.0], [null, 2739764.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 117, "label": "アドセンス(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 3875964.0], [null, 3329367.0], [null, 2675557.0], [null, 3424131.0], [null, 2915857.0], [null, 3221024.0], [null, 3265971.0], [null, 2484397.0], [null, 2463154.0], [null, 3111399.0], [null, 3712283.0], [null, 2193400.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 118, "label": "タイアップ(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 790000.0], [null, 1042000.0], [null, 400000.0], [null, 984302.0], [null, 555455.0], [null, 1463273.0], [null, 1343636.0], [null, 1222545.0], [null, 777273.0], [null, 2642939.0], [null, 701818.0], [null, 546364.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 119, "label": "LIVE配信(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 120, "label": "発生ベース売上(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 6505774.0], [null, 4346846.0], [null, 5944111.0], [null, 4758501.0], [null, 6514619.0], [null, 6840285.0], [null, 5402470.0], [null, 1800000.0], [null, 8529570.909], [null, 6015000.273], [null, 4044883.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 121, "label": "アドセンス", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 4425774.0], [null, 3606846.0], [null, 4529111.0], [null, 3930774.0], [null, 4342168.0], [null, 4402745.0], [null, 3349153.0], [null, 3320507.0], [null, 4190568.0], [null, 4579913.0], [null, 2976273.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 122, "label": "タイアップ", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 2080000.0], [null, 740000.0], [null, 1415000.0], [null, 827727.0], [null, 2100000.0], [null, 2413000.0], [null, 2025000.0], [null, 1090500.0], [null, 4207802.0], [null, 1180000.0], [null, 945000.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 123, "label": "LIVE配信", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 2451.0], [null, 4540.0], [null, 8317.0], [null, 9586.363636], [null, 1200.909091], [null, 105087.2727], [null, 13610.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 124, "label": "事務手数料", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 70000.0], [null, 20000.0], [null, 20000.0], [null, 40000.0], [null, 130000.0], [null, 150000.0], [null, 110000.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 125, "label": "発生ベース粗利(ギャラ込み)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 2134407.0], [null, 1271289.0], [null, 1535678.0], [null, 1287189.0], [null, 1830322.0], [null, 2230678.0], [null, 1695528.0], [null, 1220166.364], [null, 2775232.909], [null, 1600899.273], [null, 1305119.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 126, "label": "アドセンス", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1096407.0], [null, 931289.0], [null, 1104980.0], [null, 1014917.0], [null, 1121144.0], [null, 1136774.0], [null, 864756.0], [null, 857353.0], [null, 1079169.0], [null, 867630.0], [null, 782873.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 127, "label": "タイアップ", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1038000.0], [null, 340000.0], [null, 430698.0], [null, 272272.0], [null, 636727.0], [null, 1069364.0], [null, 802455.0], [null, 313227.0], [null, 1564863.0], [null, 478182.0], [null, 398636.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 128, "label": "LIVE配信", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 2451.0], [null, 4540.0], [null, 8317.0], [null, 9586.363636], [null, 1200.909091], [null, 105087.2727], [null, 13610.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 129, "label": "事務手数料", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 70000.0], [null, 20000.0], [null, 20000.0], [null, 40000.0], [null, 130000.0], [null, 150000.0], [null, 110000.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 130, "label": "発生原価", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 4371367.0], [null, 3075557.0], [null, 4408433.0], [null, 3471312.0], [null, 4684297.0], [null, 4609607.0], [null, 3706942.0], [null, 3240427.0], [null, 5754338.0], [null, 4414101.0], [null, 2739764.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 131, "label": "アドセンス(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 3329367.0], [null, 2675557.0], [null, 3424131.0], [null, 2915857.0], [null, 3221024.0], [null, 3265971.0], [null, 2484397.0], [null, 2463154.0], [null, 3111399.0], [null, 3712283.0], [null, 2193400.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 132, "label": "タイアップ(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1042000.0], [null, 400000.0], [null, 984302.0], [null, 555455.0], [null, 1463273.0], [null, 1343636.0], [null, 1222545.0], [null, 777273.0], [null, 2642939.0], [null, 701818.0], [null, 546364.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 133, "label": "LIVE配信(ギャラ)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 134, "label": "販管費(ギャラ以外)【合計】", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1062181.0], [null, 1168995.0], [null, 1537018.0], [null, 1458009.0], [null, 1616707.0], [null, 1954280.0], [null, 1652532.0], [null, 1507639.0], [null, 1250000.0], [null, 1507639.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 135, "label": "販管費(LIV立替)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 357181.0], [null, 363995.0], [null, 732018.0], [null, 653009.0], [null, 811707.0], [null, 1149280.0], [null, 847532.0], [null, 702639.0], [null, 702639.0], [null, 702639.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 136, "label": "販管費(BitStar立替)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 705000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, 805000.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 137, "label": "利益【合計】(着金ベース)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 1072226.0], [null, 102294.0], [null, -1340.0], [null, -100820.0], [null, 163615.0], [null, 276398.0], [null, 62996.0], [null, -197472.6364], [null, 1545232.909], [null, 53260.27273], [null, 1195119.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 138, "label": "利益【合計】(計上ベース)", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 209108.0], [null, 366683.0], [null, -249829.0], [null, 372313.0], [null, 613971.0], [null, -258752.0], [null, -432365.6364], [null, 1267593.909], [null, 350899.2727], [null, -202520.0], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636], [null, 9586.363636]]}, {"row": 139, "label": "人件費", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 318901.0], [null, 430007.0], [null, 758983.0], [null, 633825.0], [null, 762427.0], [null, 854220.0], [null, 798252.0], [null, 653359.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 140, "label": "人件費率", "section": "費用関係", "subsection": "BitStar Boost（費用）", "type": "percent", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.1494096487], [null, 0.3382448837], [null, 0.4942331661], [null, 0.4670130689], [null, 0.4282523049], [null, 0.3829418679], [null, 0.4653098055], [null, 0.4986839978], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0]]}, {"row": 142, "label": "▼売上 / 着金ベース(BS用) / 着金ベース(LIV用)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 7.0], [null, 132.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 143, "label": "TikTok", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 7.0], [null, 132.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 144, "label": "ミクチャ", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 145, "label": "計上ベース(BS用) / 発生ベース(LIV用)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 7.0], [null, 132.0], [null, 6976.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 146, "label": "TikTok", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 7.0], [null, 132.0], [null, 6976.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 147, "label": "ミクチャ", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "count", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 148, "label": "着金原価(BS用)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 149, "label": "ギャラ\tミクチャ", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 150, "label": "発生原価(BS用)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 151, "label": "ギャラ\tミクチャ", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 0.0], [null, 0.0], [null, 0.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 152, "label": "販管費【合計】", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 686555.0], [null, 678280.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 153, "label": "販管費(LIV立替)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 46555.0], [null, 38280.0], [null, 38280.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 154, "label": "販管費(BitStar立替)", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, 640000.0], [null, 640000.0], [null, 0.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 155, "label": "利益", "section": "費用関係", "subsection": "BitStar Live（費用）", "type": "yen", "values": [[null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, -686555.0], [null, -678273.0], [null, 132.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 158, "label": "ビトネク+ブースト売上(着金ベース)", "section": "費用関係", "subsection": "合算（費用）", "type": "yen", "values": [[null, 0.0], [null, 5640000.0], [null, 8110000.0], [null, 12115296.64], [null, 11442341.82], [null, 18757417.64], [null, 26947749.36], [null, 26008339.73], [null, 22494258.36], [null, 22890864.73], [null, 22422084.82], [null, 27304312.0], [null, 25438554.0], [null, 26583139.55], [null, 28051177.82], [null, 29324484.82], [null, 26200585.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 159, "label": "ビトネク+ブースト粗利(着金ベース)", "section": "費用関係", "subsection": "合算（費用）", "type": "yen", "values": [[null, 0.0], [null, 5640000.0], [null, 8110000.0], [null, 12112317.64], [null, 11399051.82], [null, 18703374.64], [null, 22240785.36], [null, 21588926.73], [null, 19758379.36], [null, 18357889.73], [null, 18633023.82], [null, 22391789.0], [null, 20367544.0], [null, 22492555.55], [null, 24594908.82], [null, 23246486.82], [null, 20840172.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}, {"row": 160, "label": "ビトネク+ブースト営業利益", "section": "費用関係", "subsection": "合算（費用）", "type": "yen", "values": [[null, -8832189.0], [null, -3027849.0], [null, -4814217.0], [null, -559752.3636], [null, -1193759.182], [null, 5829351.636], [null, 8271556.364], [null, 5525008.727], [null, 1329168.364], [null, -959770.2727], [null, 3506967.818], [null, 4767757.0], [null, -141039.0], [null, 2990579.545], [null, 4289083.818], [null, 2898300.818], [null, 234347.0], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('seed').textContent);
+const MONTHS = DATA.months;                 // ['2025-01',...,'2026-12']
+const EDIT_FROM = MONTHS.indexOf('2026-06'); // first editable index (17)
+const byRow = {}; DATA.metrics.forEach(m=>byRow[m.row]=m);
+
+/* ---------- editable overrides (persisted) ---------- */
+let store = {};
+try{ store = JSON.parse(localStorage.getItem('roadmap_edits_v1')||'{}'); }catch(e){ store={}; }
+function persist(){ try{ localStorage.setItem('roadmap_edits_v1', JSON.stringify(store)); }catch(e){} }
+function key(row,idx,which){ return row+'|'+idx+'|'+which; }
+function getVal(m,idx,which){ // which: 0=target,1=actual
+  const k=key(m.row,idx,which);
+  if(idx>=EDIT_FROM && k in store) return store[k];
+  return m.values[idx][which];
+}
+function setVal(row,idx,which,v){
+  const k=key(row,idx,which);
+  if(v===''||v===null||v===undefined){ delete store[k]; } else { store[k]=Number(v); }
+  persist();
+}
+function actual(row,idx){ return getVal(byRow[row],idx,1); }
+function target(row,idx){ return getVal(byRow[row],idx,0); }
+
+/* ---------- formatting ---------- */
+function fmt(type,v,compact){
+  if(v===null||v===undefined||isNaN(v)) return '–';
+  if(type==='percent') return (v*100).toFixed(1)+'%';
+  if(type==='yen'){
+    if(compact){ const a=Math.abs(v);
+      if(a>=1e8) return (v/1e8).toFixed(2)+'億'; if(a>=1e4) return Math.round(v/1e4)+'万'; return Math.round(v).toLocaleString();}
+    return '¥'+Math.round(v).toLocaleString();
+  }
+  // count
+  return (Math.abs(v%1)>1e-6? v.toFixed(1): Math.round(v).toLocaleString());
+}
+
+/* ---------- SVG line chart (target dashed + actual solid) ---------- */
+function lineChart(metric, w, h){
+  const pad={l:6,r:6,t:8,b:14};
+  const W=w,H=h;
+  const tgt=MONTHS.map((_,i)=>getVal(metric,i,0));
+  const act=MONTHS.map((_,i)=>getVal(metric,i,1));
+  const all=tgt.concat(act).filter(v=>v!==null&&v!==undefined&&!isNaN(v));
+  if(!all.length) return '<svg class="chart" viewBox="0 0 '+W+' '+H+'"></svg>';
+  let mn=Math.min(...all,0), mx=Math.max(...all);
+  if(mx===mn) mx=mn+1;
+  const n=MONTHS.length;
+  const X=i=> pad.l + (W-pad.l-pad.r)*(i/(n-1));
+  const Y=v=> pad.t + (H-pad.t-pad.b)*(1-(v-mn)/(mx-mn));
+  function path(arr){
+    let d='',pen=false;
+    arr.forEach((v,i)=>{ if(v===null||v===undefined||isNaN(v)){pen=false;return;}
+      d+= (pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' '; pen=true; });
+    return d.trim();
+  }
+  // divider between 2025 and 2026
+  const divX=X(11.5);
+  let dots='';
+  act.forEach((v,i)=>{ if(v===null||v===undefined||isNaN(v))return;
+    dots+='<circle class="dot" cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="1.7"/>'; });
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
+    +'<line x1="'+divX+'" y1="'+pad.t+'" x2="'+divX+'" y2="'+(H-pad.b)+'" stroke="#d7e0ee" stroke-width="1" stroke-dasharray="2 3"/>'
+    +'<path d="'+path(tgt)+'" fill="none" stroke="#94a3bc" stroke-width="1.4" stroke-dasharray="4 3" opacity=".9"/>'
+    +'<path d="'+path(act)+'" fill="none" stroke="#0ea5e9" stroke-width="2"/>'
+    +dots
+    +'<text x="'+pad.l+'" y="'+(H-3)+'" fill="#92a0b8" font-size="8" font-family="var(--mono)">25</text>'
+    +'<text x="'+(W-pad.r-12)+'" y="'+(H-3)+'" fill="#92a0b8" font-size="8" font-family="var(--mono)">26</text>'
+    +'</svg>';
+}
+
+/* ---------- view router ---------- */
+const main=document.getElementById('main');
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  [...document.querySelectorAll('#tabs button')].forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); render(b.dataset.v);
+});
+function render(v){ if(v==='funnel') renderFunnel(); else if(v==='trends') renderTrends(); else renderEdit(); }
+
+/* ============ FUNNEL ============ */
+const FUNNEL=[ // row, label
+  [12,'応募数'],[13,'名前送付数'],[15,'ADアポ数'],[17,'AD参加数'],
+  [20,'面談アポ数'],[22,'面談参加数'],[32,'決済数'],[33,'着金数'] ];
+
+function latestActualIdx(){
+  for(let i=MONTHS.length-1;i>=0;i--){ if(actual(12,i)!==null) return i; }
+  return MONTHS.length-1;
+}
+let funnelIdx = latestActualIdx();
+
+function renderFunnel(){
+  const opts=MONTHS.map((m,i)=>'<option value="'+i+'"'+(i===funnelIdx?' selected':'')+'>'+m.replace('-','年')+'月</option>').join('');
+  let html='<div class="panel">'
+    +'<div class="ctrls"><label>対象月</label><select id="fmonth">'+opts+'</select>'
+    +'<span class="hint">バーは実績、点線枠は目標。各段階の歩留まりが目標を最も下回る箇所をボトルネックとして検出します。</span></div>';
+
+  // KPI row
+  const ap=actual(12,funnelIdx), tk=actual(33,funnelIdx);
+  const sales=actual(70,funnelIdx);            // 着金ベース売上
+  const cpa=actual(11,funnelIdx);
+  const a2k = (ap&&tk)? tk/ap : null;
+  const tgtA2k = (target(12,funnelIdx)&&target(33,funnelIdx))? target(33,funnelIdx)/target(12,funnelIdx):null;
+  html+='<div class="kpis">'
+    + kcard('応募数',fmt('count',ap),deltaTxt('count',ap,target(12,funnelIdx)))
+    + kcard('着金数',fmt('count',tk),deltaTxt('count',tk,target(33,funnelIdx)))
+    + kcard('応募→着金率',fmt('percent',a2k), a2k!=null&&tgtA2k!=null? cmpPct(a2k,tgtA2k):'<span class="muted">目標 '+fmt('percent',tgtA2k)+'</span>')
+    + kcard('CPA',fmt('yen',cpa),deltaTxt('yen',cpa,target(11,funnelIdx),true))
+    + kcard('着金ベース売上',fmt('yen',sales,true),deltaTxt('yen',sales,target(70,funnelIdx),false,true))
+    +'</div>';
+
+  // build funnel
+  const maxBase = Math.max(actual(12,funnelIdx)||0, target(12,funnelIdx)||0, 1);
+  // compute conversions + find bottleneck
+  const convs=[];
+  for(let s=0;s<FUNNEL.length-1;s++){
+    const a0=actual(FUNNEL[s][0],funnelIdx), a1=actual(FUNNEL[s+1][0],funnelIdx);
+    const t0=target(FUNNEL[s][0],funnelIdx), t1=target(FUNNEL[s+1][0],funnelIdx);
+    const ac=(a0&&a1)?a1/a0:null, tc=(t0&&t1)?t1/t0:null;
+    convs.push({s,ac,tc,gap:(ac!=null&&tc!=null)? (tc-ac):null});
+  }
+  // bottleneck = largest positive gap (actual below target); fallback lowest ac
+  let bnz=-1,best=-Infinity;
+  convs.forEach(c=>{ if(c.gap!=null&&c.gap>best){best=c.gap;bnz=c.s;} });
+  if(best<=0.0001){ // no shortfall vs target -> use lowest actual conversion
+    let lo=Infinity; convs.forEach(c=>{ if(c.ac!=null&&c.ac<lo){lo=c.ac;bnz=c.s;} });
+  }
+
+  html+='<div class="funnel">';
+  for(let s=0;s<FUNNEL.length;s++){
+    const a=actual(FUNNEL[s][0],funnelIdx), t=target(FUNNEL[s][0],funnelIdx);
+    const aw=Math.max(0,(a||0)/maxBase*100), tw=Math.max(0,(t||0)/maxBase*100);
+    html+='<div class="frow"><div class="fname">'+FUNNEL[s][1]+'</div>'
+      +'<div class="fbar">'
+        +'<div class="tfill" style="width:'+tw.toFixed(1)+'%"></div>'
+        +'<div class="afill" style="width:'+aw.toFixed(1)+'%"></div>'
+        +'<div class="lbl">'+fmt('count',a)+'</div>'
+      +'</div>'
+      +'<div class="fmeta">目標 '+fmt('count',t)+'</div></div>';
+    if(s<FUNNEL.length-1){
+      const c=convs[s], isB=(s===bnz);
+      const acT=c.ac!=null?fmt('percent',c.ac):'–';
+      const tcT=c.tc!=null?fmt('percent',c.tc):'–';
+      html+='<div class="conv'+(isB?' bottleneck':'')+'"><div class="arrow">↓ 歩留まり '
+        +'<span class="pill">実績 '+acT+'</span><span class="pill">目標 '+tcT+'</span>'
+        +(isB?' <span class="btag">BOTTLENECK</span>':'')+'</div></div>';
+    }
+  }
+  html+='</div>';
+
+  // diagnosis
+  html+=buildDiagnosis(bnz,convs);
+  html+='</div>';
+  main.innerHTML=html;
+  document.getElementById('fmonth').addEventListener('change',e=>{funnelIdx=+e.target.value;renderFunnel();});
+}
+function kcard(k,v,d){ return '<div class="kpi"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="d">'+(d||'')+'</div></div>'; }
+function cmpPct(a,t){ const ok=a>=t; return '<span class="'+(ok?'up':'down')+'">目標比 '+(a>=t?'+':'')+((a-t)*100).toFixed(1)+'pt</span>'; }
+function deltaTxt(type,a,t,lowerBetter,compact){
+  if(a==null||t==null||isNaN(a)||isNaN(t)) return t!=null?'<span class="muted">目標 '+fmt(type,t,compact)+'</span>':'';
+  const diff=a-t; const good = lowerBetter? diff<=0 : diff>=0;
+  return '<span class="'+(good?'up':'down')+'">目標比 '+(diff>=0?'+':'')+fmt(type,diff,compact)+'</span>';
+}
+function buildDiagnosis(bnz,convs){
+  const idx=funnelIdx; let items=[];
+  if(bnz>=0){
+    const from=FUNNEL[bnz][1], to=FUNNEL[bnz+1][1], c=convs[bnz];
+    let msg='<b>'+from+' → '+to+'</b> が最大のボトルネックです。';
+    if(c.ac!=null&&c.tc!=null) msg+=' 歩留まり実績 <span class="mono">'+fmt('percent',c.ac)+'</span>（目標 <span class="mono">'+fmt('percent',c.tc)+'</span>／<span class="down">'+((c.ac-c.tc)*100).toFixed(1)+'pt</span>）。';
+    items.push(msg);
+    // estimated recovered count if hitting target conv
+    const a0=actual(FUNNEL[bnz][0],idx);
+    if(a0!=null&&c.tc!=null&&c.ac!=null){
+      const lost=Math.round(a0*(c.tc-c.ac));
+      if(lost>0) items.push('この段階を目標歩留まりまで改善すると、当月 <span class="mono">+'+lost+'</span> 件の'+to+'を回収できる試算です。');
+    }
+  }
+  // worst vs-target KPIs among key metrics this month
+  const watch=[[14,'名前送付率'],[16,'ADアポ率'],[18,'AD参加率'],[21,'面談アポ率'],[24,'面談参加率'],[35,'着金率'],[40,'クーオフ率']];
+  let worst=null;
+  watch.forEach(([r,l])=>{ const a=actual(r,idx),t=target(r,idx); if(a==null||t==null)return;
+    const lower = (l==='クーオフ率'); const gap = lower? (a-t) : (t-a);
+    if(gap>0 && (!worst||gap/Math.abs(t)>worst.rel)) worst={l,a,t,rel:gap/Math.abs(t),lower}; });
+  if(worst) items.push('率の指標では <b>'+worst.l+'</b> が目標から最も乖離（実績 <span class="mono">'+fmt('percent',worst.a)+'</span> vs 目標 <span class="mono">'+fmt('percent',worst.t)+'</span>）。');
+  if(actual(12,idx)===null) items.unshift('この月の実績は未入力です。「データ編集」タブから入力すると診断が更新されます。');
+  if(!items.length) items.push('主要段階はおおむね目標を達成しています。');
+  return '<div class="diag"><h3>◆ ボトルネック診断（'+MONTHS[idx].replace('-','年')+'月）</h3><ul>'+items.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>';
+}
+
+/* ============ TRENDS ============ */
+function renderTrends(){
+  const subs=[...new Set(DATA.metrics.map(m=>m.subsection))];
+  const opts='<option value="">すべて</option>'+subs.map(s=>'<option>'+s+'</option>').join('');
+  let html='<div class="panel"><div class="ctrls">'
+    +'<label>カテゴリ</label><select id="tsel">'+opts+'</select>'
+    +'<input type="text" id="tsearch" placeholder="指標名で検索…">'
+    +'<span class="hint">カードをクリックで拡大。実線＝実績、点線＝目標。中央の縦線が 2025／2026 の境界。</span>'
+    +'</div><div class="grid" id="tgrid"></div></div>';
+  main.innerHTML=html;
+  const draw=()=>{
+    const f=document.getElementById('tsel').value;
+    const q=document.getElementById('tsearch').value.trim();
+    const grid=document.getElementById('tgrid'); grid.innerHTML='';
+    let cur=null;
+    DATA.metrics.filter(m=>(!f||m.subsection===f)&&(!q||m.label.includes(q))).forEach(m=>{
+      if(m.subsection!==cur){cur=m.subsection;const h=document.createElement('div');h.className='subhead';h.textContent=cur;grid.appendChild(h);}
+      const li=latestActualIdx2(m); const lv = li>=0? getVal(m,li,1):null;
+      const c=document.createElement('div');c.className='card';
+      c.innerHTML='<div class="ct"><span>'+m.label+'</span><span class="ctag">'+typeLabel(m.type)+'</span></div>'
+        +'<div class="cv">最新 '+(li>=0?MONTHS[li].slice(2).replace('-','/'):'-')+'：'+fmt(m.type,lv)+'</div>'
+        +lineChart(m,300,82);
+      c.onclick=()=>openChart(m);
+      grid.appendChild(c);
+    });
+    if(!grid.children.length) grid.innerHTML='<div class="cv" style="color:var(--ink3)">該当する指標がありません。</div>';
+  };
+  document.getElementById('tsel').onchange=draw;
+  document.getElementById('tsearch').oninput=draw;
+  draw();
+}
+function typeLabel(t){return t==='percent'?'率':t==='yen'?'¥':'数';}
+function latestActualIdx2(m){ for(let i=MONTHS.length-1;i>=0;i--){const v=getVal(m,i,1);if(v!==null&&v!==undefined)return i;} return -1; }
+
+function openChart(m){
+  document.getElementById('mtitle').textContent=m.label;
+  document.getElementById('msub').textContent=m.subsection+' ・ '+typeLabelFull(m.type);
+  // big chart with month labels + value table-ish
+  const box=document.getElementById('mchart');
+  box.innerHTML='<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 10px 6px">'
+    + bigChart(m) + '</div>'
+    + miniTable(m);
+  document.getElementById('modal').classList.add('open');
+}
+function typeLabelFull(t){return t==='percent'?'比率':t==='yen'?'金額（円）':'件数';}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+
+function bigChart(m){
+  const W=860,H=300,pad={l:54,r:14,t:14,b:34};
+  const tgt=MONTHS.map((_,i)=>getVal(m,i,0)), act=MONTHS.map((_,i)=>getVal(m,i,1));
+  const all=tgt.concat(act).filter(v=>v!=null&&!isNaN(v));
+  if(!all.length)return '<div style="color:var(--ink3);padding:30px">データなし</div>';
+  let mn=Math.min(...all,0),mx=Math.max(...all); if(mx===mn)mx=mn+1;
+  const n=MONTHS.length;
+  const X=i=>pad.l+(W-pad.l-pad.r)*(i/(n-1));
+  const Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-mn)/(mx-mn));
+  const path=arr=>{let d='',p=false;arr.forEach((v,i)=>{if(v==null||isNaN(v)){p=false;return;}d+=(p?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';p=true;});return d.trim();};
+  let grid='',ticks=4;
+  for(let g=0;g<=ticks;g++){const val=mn+(mx-mn)*g/ticks;const y=Y(val);
+    grid+='<line x1="'+pad.l+'" y1="'+y+'" x2="'+(W-pad.r)+'" y2="'+y+'" stroke="#e3eaf4" stroke-width="1"/>'
+      +'<text x="'+(pad.l-6)+'" y="'+(y+3)+'" text-anchor="end" fill="#92a0b8" font-size="9" font-family="var(--mono)">'+fmt(m.type,val,true)+'</text>';}
+  let xl='';for(let i=0;i<n;i+=2){xl+='<text x="'+X(i)+'" y="'+(H-12)+'" text-anchor="middle" fill="#92a0b8" font-size="8.5" font-family="var(--mono)">'+MONTHS[i].slice(2).replace('-','/')+'</text>';}
+  let dots='';act.forEach((v,i)=>{if(v==null||isNaN(v))return;dots+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="2.4" fill="#0ea5e9"/>';});
+  const divX=X(11.5);
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'
+    +grid
+    +'<line x1="'+divX+'" y1="'+pad.t+'" x2="'+divX+'" y2="'+(H-pad.b)+'" stroke="#cdd9ea" stroke-dasharray="3 3"/>'
+    +'<path d="'+path(tgt)+'" fill="none" stroke="#94a3bc" stroke-width="1.8" stroke-dasharray="5 4"/>'
+    +'<path d="'+path(act)+'" fill="none" stroke="#0ea5e9" stroke-width="2.4"/>'
+    +dots+xl+'</svg>';
+}
+function miniTable(m){
+  let h='<div class="tablewrap" style="margin-top:12px;max-height:200px"><table><tr><th class="name">指標</th>';
+  MONTHS.forEach(mo=>h+='<th'+(MONTHS.indexOf(mo)>=EDIT_FROM?' class="mh"':'')+'>'+mo.slice(2).replace('-','/')+'</th>');
+  h+='</tr><tr><td class="name">目標</td>';
+  MONTHS.forEach((mo,i)=>h+='<td class="ro">'+fmt(m.type,getVal(m,i,0))+'</td>');
+  h+='</tr><tr><td class="name">実績</td>';
+  MONTHS.forEach((mo,i)=>h+='<td class="ro" style="color:var(--teal)">'+fmt(m.type,getVal(m,i,1))+'</td>');
+  h+='</tr></table></div>';
+  return h;
+}
+
+/* ============ EDIT ============ */
+function renderEdit(){
+  const subs=[...new Set(DATA.metrics.map(m=>m.subsection))];
+  const opts=subs.map((s,i)=>'<option'+(i===0?' selected':'')+'>'+s+'</option>').join('');
+  const editMonths=MONTHS.slice(EDIT_FROM); // 2026-06 .. 2026-12
+  let html='<div class="panel"><h2>データ編集 — 2026年6月以降</h2>'
+    +'<div class="desc">対象月の <b style="color:var(--amber)">目標</b> と <b style="color:var(--teal)">実績</b> を直接入力できます。入力すると採用ファネルと推移グラフに即時反映され、ブラウザに自動保存されます（2026年5月以前は確定値のため編集不可）。</div>'
+    +'<div class="ctrls"><label>カテゴリ</label><select id="esel">'+opts+'</select>'
+    +'<span class="savestat" id="savestat"></span></div>'
+    +'<div class="tablewrap"><table id="etable"></table></div>'
+    +'<div class="btns">'
+      +'<button class="btn primary" onclick="exportCSV()">CSVで書き出し</button>'
+      +'<button class="btn" onclick="exportJSON()">編集内容をJSON保存</button>'
+      +'<button class="btn danger" onclick="resetEdits()">編集をすべてリセット</button>'
+    +'</div>'
+    +'<div class="note">※ 編集はこのブラウザにのみ保存されます。元データは変更されません。共有・バックアップにはCSV/JSON書き出しをご利用ください。</div>'
+    +'</div>';
+  main.innerHTML=html;
+  const sel=document.getElementById('esel');
+  sel.onchange=()=>drawEditTable(sel.value,editMonths);
+  drawEditTable(sel.value,editMonths);
+}
+function drawEditTable(sub,editMonths){
+  const rows=DATA.metrics.filter(m=>m.subsection===sub);
+  let h='<tr><th class="name">指標</th>';
+  editMonths.forEach(mo=>h+='<th class="mh" colspan="2">'+mo.replace('-','年')+'月</th>');
+  h+='</tr><tr><th class="name"></th>';
+  editMonths.forEach(()=>h+='<th style="font-size:10px;color:var(--slate)">目標</th><th style="font-size:10px;color:var(--teal)">実績</th>');
+  h+='</tr>';
+  rows.forEach(m=>{
+    h+='<tr><td class="name">'+m.label+'<div class="tag" style="font-size:9px;color:var(--ink3)">'+typeLabelFull(m.type)+'</div></td>';
+    editMonths.forEach((mo,j)=>{
+      const idx=EDIT_FROM+j;
+      const tv=getVal(m,idx,0), av=getVal(m,idx,1);
+      h+='<td class="ed"><input data-r="'+m.row+'" data-i="'+idx+'" data-w="0" value="'+(tv==null?'':round4(tv))+'" placeholder="目標"></td>';
+      h+='<td class="ed"><input data-r="'+m.row+'" data-i="'+idx+'" data-w="1" value="'+(av==null?'':round4(av))+'" placeholder="実績"></td>';
+    });
+    h+='</tr>';
+  });
+  const t=document.getElementById('etable'); t.innerHTML=h;
+  t.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      setVal(+inp.dataset.r,+inp.dataset.i,+inp.dataset.w,inp.value.trim());
+      flashSaved();
+    });
+  });
+}
+function round4(v){ return Math.abs(v%1)>1e-9? Math.round(v*10000)/10000 : v; }
+function flashSaved(){ const s=document.getElementById('savestat'); if(!s)return; s.textContent='✓ 保存しました'; clearTimeout(window._st); window._st=setTimeout(()=>s.textContent='',1500); }
+
+function resetEdits(){
+  if(!confirm('入力した編集内容をすべて削除して元データに戻します。よろしいですか？'))return;
+  store={}; persist();
+  funnelIdx=latestActualIdx(); renderEdit();
+}
+function exportJSON(){
+  download('roadmap_edits.json', JSON.stringify(store,null,2),'application/json');
+}
+function exportCSV(){
+  const head=['section','metric','type','field'].concat(MONTHS);
+  const lines=[head.join(',')];
+  DATA.metrics.forEach(m=>{
+    ['目標','実績'].forEach((f,w)=>{
+      const row=[csv(m.subsection),csv(m.label),m.type,f];
+      MONTHS.forEach((mo,i)=>{ const v=getVal(m,i,w); row.push(v==null?'':v); });
+      lines.push(row.join(','));
+    });
+  });
+  download('roadmap_export.csv','\ufeff'+lines.join('\n'),'text/csv');
+}
+function csv(s){ s=String(s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+function download(name,content,type){
+  const b=new Blob([content],{type:type}); const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+
+/* init */
+render('funnel');
+</script>
+</body>
+</html>
